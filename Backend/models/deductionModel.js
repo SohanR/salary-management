@@ -16,6 +16,6 @@ const DeductionSchema = new Schema(
   { timestamps: true }
 );
 
-const Deduction = mongoose.model("Deduction", DeductionSchema);
+const DeductionModel = mongoose.model("Deduction", DeductionSchema);
 
-export default Deduction;
+export default DeductionModel;

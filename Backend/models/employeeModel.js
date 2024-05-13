@@ -9,7 +9,7 @@ const DataEmployeeSchema = new Schema(
       required: true,
       default: () => mongoose.Types.ObjectId().toString(),
     },
-    nik: {
+    nid: {
       type: String,
       required: true,
     },
@@ -51,6 +51,6 @@ const DataEmployeeSchema = new Schema(
   { timestamps: true }
 );
 
-const DataEmployee = mongoose.model("DataEmployee", DataEmployeeSchema);
+const EmployeeModel = mongoose.model("Employee", DataEmployeeSchema);
 
-export default DataEmployee;
+export default EmployeeModel;

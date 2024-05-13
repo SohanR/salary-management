@@ -1,48 +1,11 @@
-import DataPegawai from "../models/DataPegawaiModel.js";
 import argon2 from "argon2";
 import { verifyUser } from "../middleware/AuthUser.js";
-import DataEmployee from "../models/employeeModel.js";
-
-// export const Login = async (req, res) => {
-//   let user = {};
-//   const pegawai = await DataPegawai.findOne({
-//     where: {
-//       username: req.body.username
-//     }
-//   });
-
-//   if (!pegawai) {
-//     return res.status(404).json({ msg: "Data Pegawai Tidak Ditemukan" });
-//   }
-
-//   const match = await argon2.verify(pegawai.password, req.body.password);
-
-//   if (!match) {
-//     return res.status(400).json({ msg: "Password Salah" });
-//   }
-
-//   req.session.userId = pegawai.id_pegawai;
-
-//   user = {
-//     id_pegawai: pegawai.id,
-//     nama_pegawai: pegawai.nama_pegawai,
-//     username: pegawai.username,
-//     hak_akses: pegawai.hak_akses
-//   }
-
-//   res.status(200).json({
-//     id_pegawai: user.id_pegawai,
-//     nama_pegawai: user.nama_pegawai,
-//     username: user.username,
-//     hak_akses: user.hak_akses,
-//     msg: "Login Berhasil"
-//   });
-// };
+import EmployeeModel from "../models/employeeModel.js";
 
 export const Login = async (req, res) => {
   let user = {};
   try {
-    const employee = await DataEmployee.findOne({
+    const employee = await EmployeeModel.findOne({
       username: req.body.username,
     });
 
@@ -77,24 +40,26 @@ export const Login = async (req, res) => {
     res.status(500).json({ msg: "Internal server error" });
   }
 };
+
 export const Me = async (req, res) => {
   if (!req.session.userId) {
-    return res.status(401).json({ msg: "Mohon Login ke Akun Anda!" });
+    return res.status(401).json({ msg: "You must be logged in" });
   }
-  const pegawai = await DataPegawai.findOne({
-    attributes: ["id", "nik", "nama_pegawai", "username", "hak_akses"],
-    where: {
-      id_pegawai: req.session.userId,
-    },
-  });
-  if (!pegawai) return res.status(404).json({ msg: "User Tidak di Temukan" });
-  res.status(200).json(pegawai);
+
+  const employee = await EmployeeModel.findOne(
+    { employeeId: req.session.userId },
+    { nid: 1, employeeName: 1, username: 1, accessRights: 1, _id: 0 }
+  );
+
+  if (!employee) return res.status(404).json({ msg: "User not found" });
+
+  return res.status(200).json(employee);
 };
 
 export const LogOut = (req, res) => {
   req.session.destroy((err) => {
-    if (err) return res.status(400).json({ msg: "Tidak dapat logout" });
-    res.status(200).json({ msg: "Anda Telah Logout" });
+    if (err) return res.status(400).json({ msg: "Unable to logout" });
+    res.status(200).json({ msg: "You have been logged out" });
   });
 };
 
@@ -103,33 +68,24 @@ export const changePassword = async (req, res) => {
 
   const userId = req.userId;
 
-  const user = await DataPegawai.findOne({
-    where: {
-      id: userId,
-    },
-  });
+  const user = await EmployeeModel.findById(userId);
+
+  if (!user) return res.status(401).json({ msg: "User not found" });
 
   const { password, confPassword } = req.body;
 
   if (password !== confPassword)
     return res
       .status(400)
-      .json({ msg: "Password dan Konfirmasi Password Tidak Cocok" });
+      .json({ msg: "Password and Confirm Password do not match" });
 
   try {
     const hashPassword = await argon2.hash(password);
 
-    await DataPegawai.update(
-      {
-        password: hashPassword,
-      },
-      {
-        where: {
-          id: user.id,
-        },
-      }
-    );
-    res.status(200).json({ msg: "Password Berhasil di Perbarui" });
+    await EmployeeModel.findByIdAndUpdate(userId, {
+      password: hashPassword,
+    });
+    res.status(200).json({ msg: "Password updated successfully" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
