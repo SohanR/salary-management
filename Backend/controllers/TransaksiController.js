@@ -76,7 +76,7 @@ export const viewDataKehadiranByID = async (req, res) => {
       ],
       where: {
         id: req.params.id,
-      }
+      },
     });
     res.json(dataKehadiran);
   } catch (error) {
@@ -415,15 +415,31 @@ export const getDataGajiPegawai = async () => {
     const resultDataPotongan = await getDataPotongan();
 
     const potongan_pegawai = resultDataKehadiran.map((kehadiran) => {
-      const potonganAlpha = kehadiran.alpha > 0 ?
-        resultDataPotongan
-          .filter((potongan) => potongan.nama_potongan.toLowerCase() === "alpha")
-          .reduce((total, potongan) => total + potongan.jml_potongan * kehadiran.alpha, 0) : 0;
+      const potonganAlpha =
+        kehadiran.alpha > 0
+          ? resultDataPotongan
+              .filter(
+                (potongan) => potongan.nama_potongan.toLowerCase() === "alpha"
+              )
+              .reduce(
+                (total, potongan) =>
+                  total + potongan.jml_potongan * kehadiran.alpha,
+                0
+              )
+          : 0;
 
-      const potonganSakit = kehadiran.sakit > 0 ?
-        resultDataPotongan
-          .filter((potongan) => potongan.nama_potongan.toLowerCase() === "sakit")
-          .reduce((total, potongan) => total + potongan.jml_potongan * kehadiran.sakit, 0) : 0;
+      const potonganSakit =
+        kehadiran.sakit > 0
+          ? resultDataPotongan
+              .filter(
+                (potongan) => potongan.nama_potongan.toLowerCase() === "sakit"
+              )
+              .reduce(
+                (total, potongan) =>
+                  total + potongan.jml_potongan * kehadiran.sakit,
+                0
+              )
+          : 0;
 
       return {
         tahun: kehadiran.tahun,
@@ -434,7 +450,7 @@ export const getDataGajiPegawai = async () => {
         alpha: kehadiran.alpha,
         potonganSakit: potonganSakit,
         potonganAlpha: potonganAlpha,
-        total_potongan: potonganSakit + potonganAlpha
+        total_potongan: potonganSakit + potonganAlpha,
       };
     });
 
@@ -447,11 +463,12 @@ export const getDataGajiPegawai = async () => {
       const potongan = potongan_pegawai.find(
         (potongan) => potongan.nama_pegawai === pegawai.nama_pegawai
       );
-      const total_gaji =
-      (pegawai.gaji_pokok +
-      pegawai.tj_transport +
-      pegawai.uang_makan -
-      (potongan ? potongan.total_potongan : 0)).toLocaleString();
+      const total_gaji = (
+        pegawai.gaji_pokok +
+        pegawai.tj_transport +
+        pegawai.uang_makan -
+        (potongan ? potongan.total_potongan : 0)
+      ).toLocaleString();
 
       return {
         tahun: potongan ? potongan.tahun : kehadiran ? kehadiran.tahun : 0,
@@ -516,14 +533,13 @@ export const viewDataGajiPegawaiByName = async (req, res) => {
       });
 
     if (dataGajiByName.length === 0) {
-      return res.status(404).json({ msg: 'Data tidak ditemukan' });
+      return res.status(404).json({ msg: "Data tidak ditemukan" });
     }
     return res.json(dataGajiByName);
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 // method untuk melihat data gaji pegawai berdasarkan ID
 export const viewDataGajiById = async (req, res) => {
@@ -567,8 +583,6 @@ export const viewDataGajiByName = async (req, res) => {
     res.status(500).json({ msg: "Internal server error" });
   }
 };
-
-
 
 // method untuk mencari data gaji pegawai berdasarkan bulan
 export const viewDataGajiPegawaiByMonth = async (req, res) => {
@@ -685,8 +699,8 @@ export const dataLaporanGajiByYear = async (req, res) => {
         .status(404)
         .json({ msg: `Data tahun ${year} tidak ditemukan` });
     } else {
-      const laporanByYear = dataGajiByYear.map((data) => data.tahun)
-      console.log(laporanByYear)
+      const laporanByYear = dataGajiByYear.map((data) => data.tahun);
+      console.log(laporanByYear);
     }
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });

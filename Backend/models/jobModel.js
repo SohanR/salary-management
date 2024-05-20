@@ -29,7 +29,7 @@ const JobSchema = new Schema({
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "EmployeeData",
+    ref: "Employee",
     required: true,
   },
 });
